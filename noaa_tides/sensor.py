@@ -126,7 +126,19 @@ class NOAATidesAndCurrentsSensor(Entity):
             self.attr = {ATTR_ATTRIBUTION: DEFAULT_ATTRIBUTION}
         if self.data is None:
             return self.attr
-
+# Expose the full prediction window (every high/low point NOAA
+        # returned — typically ~24h behind to ~24h ahead of now) so a
+        # frontend chart can draw the complete NOAA-style curve instead
+        # of only the single next/last tide segment.
+        predictions = []
+        for index, row in self.data.iterrows():
+            predictions.append({
+                "time": index.strftime("%Y-%m-%dT%H:%M:%S"),
+                "height": round(float(row.predicted_wl), 3),
+                "type": "High" if row.hi_lo == "H" else "Low",
+            })
+        self.attr["tide_predictions"] = predictions
+        
         now = datetime.now()
         tide_text = None
         most_recent = None
