@@ -95,22 +95,29 @@ class NOAATidesAndCurrentsSensor(Entity):
         return self._name
 
     def update_tide_factor_from_attr(self):
-        _LOGGER.debug("Updating sine fit for tide factor")
-        if self.attr is None:
-            return
-        if ("last_tide_time" not in self.attr or
-            "next_tide_time" not in self.attr or
-            "next_tide_type" not in self.attr):
-            return
-        now = datetime.now()
-        most_recent = datetime.strptime(self.attr["last_tide_time"], "%I:%M %p")
-        next_tide_time = datetime.strptime(self.attr["next_tide_time"], "%I:%M %p")
-        predicted_period = (next_tide_time - most_recent).seconds
-        if self.attr["next_tide_type"] == "High":
-            self.attr["tide_factor"] = 50 - (50*math.cos((now - most_recent).seconds * math.pi / predicted_period))
-        else:
-            self.attr["tide_factor"] = 50 + (50*math.cos((now - most_recent).seconds * math.pi / predicted_period))
-
+      _LOGGER.debug("Updating sine fit for tide factor")
+      if self.attr is None:
+          return
+      if ("last_tide_time" not in self.attr or
+          "next_tide_time" not in self.attr or
+          "next_tide_type" not in self.attr):
+          return
+      now = datetime.now()
+      most_recent = datetime.strptime(self.attr["last_tide_time"], "%I:%M %p")
+      next_tide_time = datetime.strptime(self.attr["next_tide_time"], "%I:%M %p")
+      most_recent = most_recent.replace(year=now.year, month=now.month, day=now.day)
+      next_tide_time = next_tide_time.replace(year=now.year, month=now.month, day=now.day)
+      if most_recent > now:
+          most_recent -= timedelta(days=1)
+      if next_tide_time <= most_recent:
+          next_tide_time += timedelta(days=1)
+      predicted_period = (next_tide_time - most_recent).total_seconds()
+      elapsed = (now - most_recent).total_seconds()
+      if self.attr["next_tide_type"] == "High":
+          self.attr["tide_factor"] = 50 - (50*math.cos(elapsed * math.pi / predicted_period))
+      else:
+          self.attr["tide_factor"] = 50 + (50*math.cos(elapsed * math.pi / predicted_period))
+    
     @property
     def extra_state_attributes(self):
         _LOGGER.debug("extra_state_attributes queried")
