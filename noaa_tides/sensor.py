@@ -239,10 +239,10 @@ class NOAATemperatureSensor(NOAATidesAndCurrentsSensor):
             return self.attr
 
         if self.data[0] is not None:
-            self.attr["temperature"] = self.data[0].water_temp[0]
+            self.attr["temperature"] = self.data[0].water_temp.iloc[0]
             self.attr["temperature_time"] = self.data[0].index[0].strftime("%Y-%m-%dT%H:%M")
         if self.data[1] is not None:
-            self.attr["air_temperature"] = self.data[1].air_temp[0]
+            self.attr["air_temperature"] = self.data[1].air_temp.iloc[0]
             self.attr["air_temperature_time"] = self.data[1].index[0].strftime("%Y-%m-%dT%H:%M")
         return self.attr
 
@@ -254,7 +254,7 @@ class NOAATemperatureSensor(NOAATidesAndCurrentsSensor):
         if self.data[0] is None:
             # If there is no water temperature use the air temperature
             return self.data[1].air_temp[0]
-        return self.data[0].water_temp[0]
+        return self.data[0].water_temp.iloc[0]
 
     @property
     def device_class(self) -> Optional[str]:
