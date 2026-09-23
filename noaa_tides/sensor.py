@@ -190,8 +190,9 @@ class NOAATidesAndCurrentsSensor(Entity):
                 return
 
         begin = datetime.now() - timedelta(hours=24)
-        begin_date=begin.strftime("%Y%m%d %H:%M")
-        end = begin + timedelta(hours=48)
+        begin_date = begin.strftime("%Y%m%d %H:%M")
+
+        end = datetime.now() + timedelta(days=7)
         end_date = end.strftime("%Y%m%d %H:%M")
         try:
             df_predictions = self._station.get_data(
